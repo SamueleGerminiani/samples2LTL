@@ -50,6 +50,11 @@ class DagSATEncoding:
         #keeping track of which positions in a tree (and in time) are visited, so that constraints are not generated twice
 #        self.visitedPositions = set()
 
+    def enforce_operator_restrictions(self):
+        # Ensure that certain operators are never used,
+        for i in  range(0,self.formulaDepth-2,1):
+            for op in ['G']:  # Explicitly list disallowed operators
+                self.solver.add(Not(self.x[(i, op)]))  # Ensure these operators are never true
 
     def getInformativeVariables(self):
         res = []
@@ -83,7 +88,13 @@ class DagSATEncoding:
                   for positionInTrace in range(trace.lengthOfTrace)}
         
         
+
         self.solver.set(unsat_core=unsatCore)
+
+        #root must be a globally operator
+        self.solver.assert_and_track(self.x[(self.formulaDepth-1, 'G')], 'root must be globally operator G')
+        #self.solver.assert_and_track(self.x[(self.formulaDepth-2, '->')], 'the first child is implication operator')
+
 
         self.exactlyOneOperator()       
         self.firstOperatorVariable()
@@ -97,6 +108,7 @@ class DagSATEncoding:
         self.solver.assert_and_track(And( [ Not(self.y[(self.formulaDepth - 1, traceIdx, 0)]) for traceIdx in range(len(self.traces.acceptedTraces), len(self.traces.acceptedTraces+self.traces.rejectedTraces))] ),\
                                      'rejecting traces should be rejected')
         
+        self.enforce_operator_restrictions()
         
     
     

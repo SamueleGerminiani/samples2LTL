@@ -28,6 +28,7 @@ def main():
     parser.add_argument("--test_sat_method", dest="testSatMethod", default=False, action='store_true')
     parser.add_argument("--timeout", dest="timeout", default=600, help="timeout in seconds")
     parser.add_argument("--log", dest="loglevel", default="INFO")
+    parser.add_argument("--dump_to", dest="dumpTo", default="out.txt")
     args,unknown = parser.parse_known_args()
     tracesFileName = args.tracesFileName
     
@@ -53,17 +54,22 @@ def main():
     traces = ExperimentTraces()
     traces.readTracesFromFile(tracesFileName)
     solvingTimeout = int(args.timeout)
+    dumpTo = args.dumpTo
     #print(traces)
     timeout = int(args.timeout)
     if args.testSatMethod == True:
         [formulas, timePassed] = run_solver(finalDepth=maxDepth, traces=traces, maxNumOfFormulas = numFormulas, startValue=startDepth, step=iterationStep)
         logging.info("formulas: "+str([f.prettyPrint(f) for f in formulas])+", timePassed: "+str(timePassed))
+        with open(dumpTo, "w") as f:
+            #dump one formula per line
+            for formula in formulas:
+                f.write(formula.prettyPrint()+"\n")
         
     
-    if args.testDtMethod == True:
-        
-        [timePassed, numAtoms, numPrimitives] = run_dt_solver(traces=traces)
-        logging.info("timePassed: {0}, numAtoms: {1}, numPrimitives: {2}".format(str(timePassed), str(numAtoms), str(numPrimitives)))
+   # if args.testDtMethod == True:
+   #     
+   #     [timePassed, numAtoms, numPrimitives] = run_dt_solver(traces=traces)
+   #     logging.info("timePassed: {0}, numAtoms: {1}, numPrimitives: {2}".format(str(timePassed), str(numAtoms), str(numPrimitives)))
         
     
 

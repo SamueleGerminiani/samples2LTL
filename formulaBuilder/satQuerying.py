@@ -11,7 +11,9 @@ def get_models(finalDepth, traces, startValue, step, encoder, maxNumModels=1):
     i = startValue
     fg = encoder(i, traces)
     fg.encodeFormula()
-    while len(results) < maxNumModels and i < finalDepth:
+    while len(results) < maxNumModels and i <= finalDepth:
+        #print depth
+        logging.info("checking depth {}".format(i))
         solverRes = fg.solver.check()
         if not solverRes == sat:
             logging.debug("not sat for i = {}".format(i))
@@ -23,7 +25,13 @@ def get_models(finalDepth, traces, startValue, step, encoder, maxNumModels=1):
             formula = fg.reconstructWholeFormula(solverModel)
             logging.info("found formula {}".format(formula.prettyPrint()))
             #print("found formula {}".format(formula))
-            formula = Formula.normalize(formula)
+            try:
+                formula = Formula.normalize(formula)
+            except Exception as e:
+                logging.error("error normalizing formula, continue...")
+                logging.error(e)
+                logging.error(traceback.format_exc())
+                continue
             logging.info("normalized formula {}".format(formula))
             if formula not in results:
                 results.append(formula)
