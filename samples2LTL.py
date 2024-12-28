@@ -63,7 +63,9 @@ def main():
         with open(dumpTo, "w") as f:
             #dump one formula per line
             for formula in formulas:
-                f.write(formula.prettyPrint()+"\n")
+                pp=formula.prettyPrint()
+                if pp != "true":
+                   f.write(pp+"\n")
         
     
    # if args.testDtMethod == True:

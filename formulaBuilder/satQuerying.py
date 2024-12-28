@@ -13,7 +13,7 @@ def get_models(finalDepth, traces, startValue, step, encoder, maxNumModels=1):
     fg.encodeFormula()
     while len(results) < maxNumModels and i <= finalDepth:
         #print depth
-        logging.info("checking depth {}".format(i))
+        logging.info("depth {}".format(i))
         solverRes = fg.solver.check()
         if not solverRes == sat:
             logging.debug("not sat for i = {}".format(i))
