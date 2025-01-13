@@ -55,7 +55,7 @@ def main():
     finalDepth = int(args.maxDepth)
     traces = ExperimentTraces()
     traces.readTracesFromFile(tracesFileName)
-    solvingTimeout = int(args.timeout)
+    timeout = int(args.timeout)
     dumpTo = args.dumpTo
     forceAlwaysImplication = args.forceAlwaysImplication
     forceAlways = args.forceAlways
@@ -67,10 +67,11 @@ def main():
         templateMode=1
         
 
+    #debug
     #print(traces)
-    timeout = int(args.timeout)
+
     if args.testSatMethod == True:
-        [formulas, timePassed] = run_solver(finalDepth=maxDepth, traces=traces, maxNumOfFormulas = numFormulas, startValue=startDepth, step=iterationStep, templateMode=templateMode)
+        [formulas, timePassed] = run_solver(finalDepth=maxDepth, traces=traces, maxNumOfFormulas = numFormulas, startValue=startDepth, step=iterationStep, templateMode=templateMode, timeout=timeout)
         logging.info("formulas: "+str([f.prettyPrint(f) for f in formulas])+", timePassed: "+str(timePassed))
         with open(dumpTo, "w") as f:
             #dump one formula per line

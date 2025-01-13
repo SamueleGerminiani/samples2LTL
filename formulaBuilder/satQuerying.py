@@ -5,14 +5,24 @@ import pdb
 import traceback
 import logging
 from utils.SimpleTree import Formula
+import time
 
-def get_models(finalDepth, traces, startValue, step, encoder, maxNumModels=1, templateMode=0):
+def get_models(finalDepth, traces, startValue, step, encoder, maxNumModels=1, templateMode=0, timeout=600):
     results = []
     i = startValue
     fg = encoder(i, traces)
     fg.encodeFormula(True, templateMode) 
-    while len(results) < maxNumModels and i <= finalDepth:
+    start = time.time()
+    while i <= finalDepth:
         #print depth
+        if time.time() - start > timeout:
+            logging.error("Timeout reached, stopping...")
+            break
+
+        if len(results) >= maxNumModels:
+            logging.info("Reached max number of formulas, stopping...")
+            break
+
         logging.info("depth {}".format(i))
         solverRes = fg.solver.check()
         if not solverRes == sat:
@@ -56,6 +66,7 @@ def get_models(finalDepth, traces, startValue, step, encoder, maxNumModels=1, te
                     raise Z3Exception("arrays and uninterpreted sorts are not supported")
                 block.append(c != solverModel[d])
             fg.solver.add(Or(block))
+
     return results
 
 
