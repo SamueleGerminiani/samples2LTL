@@ -50,11 +50,12 @@ class DagSATEncoding:
         #keeping track of which positions in a tree (and in time) are visited, so that constraints are not generated twice
 #        self.visitedPositions = set()
 
-    def enforce_operator_restrictions(self):
+    def enforce_operator_restrictions(self,templateMode=0):
         # Ensure that certain operators are never used,
-        for i in  range(0,self.formulaDepth-2,1):
-            for op in ['G']:  # Explicitly list disallowed operators
-                self.solver.add(Not(self.x[(i, op)]))  # Ensure these operators are never true
+        if templateMode!=0:
+            for i in  range(0,self.formulaDepth-2,1):
+                for op in ['G']:  # Explicitly list disallowed operators
+                    self.solver.add(Not(self.x[(i, op)]))  # Ensure these operators are never true
 
     def getInformativeVariables(self):
         res = []
@@ -71,7 +72,7 @@ class DagSATEncoding:
         - r[i][j]: "right operand of subformula i is subformula j"
         - y[i][tr][t]: semantics of formula i in time point t of trace tr
     """
-    def encodeFormula(self, unsatCore=True):
+    def encodeFormula(self, unsatCore=True,templateMode=0):
         self.operatorsAndVariables = self.listOfOperators + self.listOfVariables
         
         self.x = { (i, o) : Bool('x_'+str(i)+'_'+str(o)) for i in range(self.formulaDepth) for o in self.operatorsAndVariables }
@@ -91,9 +92,12 @@ class DagSATEncoding:
 
         self.solver.set(unsat_core=unsatCore)
 
-        #root must be a globally operator
-        self.solver.assert_and_track(self.x[(self.formulaDepth-1, 'G')], 'root must be globally operator G')
-        #self.solver.assert_and_track(self.x[(self.formulaDepth-2, '->')], 'the first child is implication operator')
+        #root must be a globally operator - usm-t
+        if templateMode == 1 or templateMode == 2:
+            self.solver.assert_and_track(self.x[(self.formulaDepth-1, 'G')], 'root must be globally operator G')
+
+        if templateMode == 2:
+            self.solver.assert_and_track(self.x[(self.formulaDepth-2, '->')], 'the first child is implication operator')
 
 
         self.exactlyOneOperator()       
@@ -108,7 +112,7 @@ class DagSATEncoding:
         self.solver.assert_and_track(And( [ Not(self.y[(self.formulaDepth - 1, traceIdx, 0)]) for traceIdx in range(len(self.traces.acceptedTraces), len(self.traces.acceptedTraces+self.traces.rejectedTraces))] ),\
                                      'rejecting traces should be rejected')
         
-        self.enforce_operator_restrictions()
+        self.enforce_operator_restrictions(templateMode)
         
     
     

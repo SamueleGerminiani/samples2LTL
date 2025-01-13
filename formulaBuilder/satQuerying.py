@@ -6,11 +6,11 @@ import traceback
 import logging
 from utils.SimpleTree import Formula
 
-def get_models(finalDepth, traces, startValue, step, encoder, maxNumModels=1):
+def get_models(finalDepth, traces, startValue, step, encoder, maxNumModels=1, templateMode=0):
     results = []
     i = startValue
     fg = encoder(i, traces)
-    fg.encodeFormula()
+    fg.encodeFormula(True, templateMode) 
     while len(results) < maxNumModels and i <= finalDepth:
         #print depth
         logging.info("depth {}".format(i))
@@ -19,7 +19,7 @@ def get_models(finalDepth, traces, startValue, step, encoder, maxNumModels=1):
             logging.debug("not sat for i = {}".format(i))
             i += step
             fg = encoder(i, traces)
-            fg.encodeFormula()
+            fg.encodeFormula(True, templateMode)
         else:
             solverModel = fg.solver.model()
             formula = fg.reconstructWholeFormula(solverModel)

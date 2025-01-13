@@ -29,6 +29,8 @@ def main():
     parser.add_argument("--timeout", dest="timeout", default=600, help="timeout in seconds")
     parser.add_argument("--log", dest="loglevel", default="INFO")
     parser.add_argument("--dump_to", dest="dumpTo", default="out.txt")
+    parser.add_argument("--force_always_implication", dest="forceAlwaysImplication", default=False)
+    parser.add_argument("--force_always", dest="forceAlways", default=False)
     args,unknown = parser.parse_known_args()
     tracesFileName = args.tracesFileName
     
@@ -55,10 +57,20 @@ def main():
     traces.readTracesFromFile(tracesFileName)
     solvingTimeout = int(args.timeout)
     dumpTo = args.dumpTo
+    forceAlwaysImplication = args.forceAlwaysImplication
+    forceAlways = args.forceAlways
+    templateMode=0
+
+    if forceAlwaysImplication:
+        templateMode=2
+    elif forceAlways:
+        templateMode=1
+        
+
     #print(traces)
     timeout = int(args.timeout)
     if args.testSatMethod == True:
-        [formulas, timePassed] = run_solver(finalDepth=maxDepth, traces=traces, maxNumOfFormulas = numFormulas, startValue=startDepth, step=iterationStep)
+        [formulas, timePassed] = run_solver(finalDepth=maxDepth, traces=traces, maxNumOfFormulas = numFormulas, startValue=startDepth, step=iterationStep, templateMode=templateMode)
         logging.info("formulas: "+str([f.prettyPrint(f) for f in formulas])+", timePassed: "+str(timePassed))
         with open(dumpTo, "w") as f:
             #dump one formula per line
