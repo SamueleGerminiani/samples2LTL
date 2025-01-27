@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--max_depth", dest="maxDepth", default='8')
     parser.add_argument("--start_depth", dest="startDepth", default='1')
     parser.add_argument("--max_num_formulas", dest="numFormulas", default='1')
+    parser.add_argument("--max_trace_length", dest="max_samples", default='10000')
     parser.add_argument("--iteration_step", dest="iterationStep", default='1')
     parser.add_argument("--test_dt_method", dest="testDtMethod", default=False, action='store_true')
     parser.add_argument("--test_sat_method", dest="testSatMethod", default=False, action='store_true')
@@ -51,10 +52,8 @@ def main():
     startDepth = int(args.startDepth)
     traces = ExperimentTraces()
     iterationStep = int(args.iterationStep)
-    traces.readTracesFromFile(args.tracesFileName)
     finalDepth = int(args.maxDepth)
-    traces = ExperimentTraces()
-    traces.readTracesFromFile(tracesFileName)
+    traces.readTracesFromFile(tracesFileName, int(args.max_samples))
     timeout = int(args.timeout)
     dumpTo = args.dumpTo
     forceAlwaysImplication = args.forceAlwaysImplication

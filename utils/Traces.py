@@ -3,7 +3,7 @@ from utils.SimpleTree import SimpleTree, Formula
 import io
 
 
-def lineToTrace(line):
+def lineToTrace(line,max_samples=10000):
     lassoStart = None
     try:
         traceData, lassoStart = line.split('::')
@@ -11,6 +11,9 @@ def lineToTrace(line):
         traceData = line
     traceVector = [[bool(int(varValue)) for varValue in varsInTimestep.split(',')] for varsInTimestep in
                    traceData.split(';')]
+    if len(traceVector) > max_samples:
+        traceVector = traceVector[:max_samples]
+
     trace = Trace(traceVector, lassoStart)
     return trace
 
@@ -240,11 +243,11 @@ class ExperimentTraces:
             trace = self._flieTraceToTrace(tr)
             self.rejectedTraces.append(trace)
 
-    def readTracesFromString(self, s):
+    def readTracesFromString(self, s, max_samples):
         stream = io.StringIO(s)
-        self.readTracesFromStream(stream)
+        self.readTracesFromStream(stream, max_samples)
 
-    def readTracesFromStream(self, stream):
+    def readTracesFromStream(self, stream, max_samples):
 
         readingMode = 0
 
@@ -256,7 +259,7 @@ class ExperimentTraces:
             else:
                 if readingMode == 0:
 
-                    trace = lineToTrace(line)
+                    trace = lineToTrace(line, max_samples)
                     trace.intendedEvaluation = True
 
                     self.acceptedTraces.append(trace)
@@ -299,6 +302,6 @@ class ExperimentTraces:
             if trace.numVariables != self.numVariables:
                 raise Exception("wrong number of variables")
 
-    def readTracesFromFile(self, tracesFileName):
+    def readTracesFromFile(self, tracesFileName, max_samples):
         with open(tracesFileName) as tracesFile:
-            self.readTracesFromStream(tracesFile)
+            self.readTracesFromStream(tracesFile,max_samples)
